@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#8b5cc7">
+<title>Cyber Rescue - Operación Infección</title>
+<style>
+:root{
+  --ink:#392650;--muted:#796b8c;--purple:#8954bd;--purple-dark:#653b9b;
+  --lavender:#eadcff;--pink:#f7e5f7;--blue:#e5eaff;--line:#d8c1ed;
+  --panel:rgba(255,255,255,.88);--good:#32845f;--bad:#bd4f78;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:22px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);
+ background:radial-gradient(ellipse at 12% 8%,#f9e8fb 0,transparent 34%),radial-gradient(ellipse at 90% 20%,#dce5ff 0,transparent 35%),linear-gradient(135deg,#d8c4f5,#f8eafa 48%,#dce5ff)}
+button{font:inherit;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}
+.game{max-width:1050px;margin:auto}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}
+h1{margin:0;color:var(--purple-dark);font-size:clamp(22px,4vw,30px);letter-spacing:.3px}
+h2{color:var(--purple-dark)}
+p{color:var(--muted);line-height:1.6}
+.stats{display:flex;gap:9px;flex-wrap:wrap}
+.stat,.screen,.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;box-shadow:0 8px 25px #6e4b8b12}
+.stat{padding:10px 16px;text-align:center;min-width:90px}
+.stat small{display:block;color:var(--muted);font-size:11px;letter-spacing:.8px;font-weight:800}
+.stat b{font-size:18px}
+.screen{padding:clamp(20px,4vw,34px);box-shadow:0 18px 50px #68438b20;backdrop-filter:blur(8px)}
+.center{text-align:center}.hidden{display:none!important}
+button{border-radius:12px;padding:12px 17px;border:1px solid #d4bce9;background:#fffaff;color:var(--ink);font-weight:650}
+button:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 7px 18px #8050ae20}
+button:focus-visible{outline:3px solid #a979d7;outline-offset:3px}
+button:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+.primary{background:linear-gradient(135deg,#a66bd0,#8050b8);color:white;font-weight:800;border:0;box-shadow:0 7px 18px #8050ae30}
+.primary:hover{background:linear-gradient(135deg,#985ac7,#7042a7)}
+.terminal{background:linear-gradient(145deg,#30213f,#49305d);border:1px solid #76588d;border-radius:14px;padding:18px;margin:22px 0;font-family:ui-monospace,Consolas,monospace;line-height:1.85;color:#d8f7e7;text-align:left;box-shadow:inset 0 1px #ffffff12}
+.red{color:#ff9ab7}.yellow{color:#ffe29a}
+.head{display:flex;justify-content:space-between;gap:20px;margin-bottom:18px;align-items:flex-start}
+.head h2{margin:8px 0}.head small{color:var(--purple);font-weight:850;letter-spacing:1px}
+.progress-wrap{min-width:220px;background:#f4eaff;padding:13px;border:1px solid var(--line);border-radius:14px}
+.bar{height:12px;background:#e5d9ef;border:1px solid #d4c1e4;border-radius:20px;overflow:hidden;min-width:190px;margin-top:7px}
+.fill{height:100%;background:linear-gradient(90deg,#b78ae0,#e78bbd);width:20%;transition:width .35s}
+.mission,.feedback,.tip{padding:16px;border-radius:13px;margin:14px 0;background:#f4ebff;border:1px solid #d9c0ef}
+.feedback.good{border-color:#8ac9a7;background:#e8f7ed}.feedback.bad{border-color:#e7a0bb;background:#fff0f5}
+.feedback.info{border-color:#bda3df;background:#f3edff}
+.tip{border-color:#c3a5e5;background:#f6efff}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{text-align:left;padding:18px;background:linear-gradient(145deg,#fff,#f8f1ff);color:var(--ink);min-height:116px}
+.card.selected{border:2px solid #9864c5;background:#f0e3ff;box-shadow:0 0 0 3px #a77bc51c}
+.icon{font-size:30px;margin-bottom:7px}.muted{color:var(--muted);font-size:13px;line-height:1.5;margin-top:5px}
+.sequence{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fffaff;border:1px solid var(--line);padding:13px;border-radius:12px;cursor:grab;user-select:none;transition:transform .15s,border-color .15s,opacity .15s}
+.row:active{cursor:grabbing}.row.dragging{opacity:.45;border-style:dashed;transform:scale(.99)}
+.row.drag-over{border-color:#9b6ac6;box-shadow:0 0 0 2px #9b6ac633}
+.drag-handle{font-size:20px;margin-right:10px;color:var(--purple)}
+.step-text{flex:1}.move-buttons{display:flex;gap:5px}.small{padding:7px 10px}
+.files{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.file{text-align:center;padding:20px;background:#fff6fa;border:1px solid #e5a9c4;border-radius:12px}
+.timer{text-align:center;font-size:28px;color:#9a5c24;font-weight:800;margin:10px}
+.actions{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap}
+.learn{text-align:left;display:grid;gap:9px;max-width:700px;margin:20px auto}
+.learn div{background:#f5efff;padding:13px;border-radius:10px;border:1px solid var(--line)}
+.status-note{font-size:13px;color:var(--muted);margin-top:8px}
+@media(max-width:700px){
+ body{padding:12px}.top,.head{flex-direction:column;align-items:stretch}
+ .stats{display:grid;grid-template-columns:repeat(3,1fr)}
+ .stat{min-width:0;padding:9px 5px}.bar{min-width:0;width:100%}
+ .progress-wrap{min-width:0}.grid,.files{grid-template-columns:1fr}
+ .screen{padding:18px}.actions button{flex:1}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="game">
+  <div class="top">
+    <div><h1>🛡️ CYBER RESCUE</h1><p>Operación: Detener la Infección</p></div>
+    <div class="stats">
+      <div class="stat"><small>PUNTOS</small><b id="score">0</b></div>
+      <div class="stat"><small>VIDAS</small><b id="lives">❤️❤️❤️</b></div>
+      <div class="stat"><small>NIVEL</small><b id="lvl">0/6</b></div>
+    </div>
+  </div>
+
+  <section id="intro" class="screen center">
+    <div style="font-size:68px">🧠🛡️</div>
+    <h2 style="font-size:clamp(30px,5vw,42px);margin:5px">Cyber Rescue</h2>
+    <p>Una computadora está mostrando comportamientos extraños. Investiga las pistas, descubre qué ocurre y detén la infección. El juego enseña malware, phishing, ransomware, aislamiento, copias de seguridad y pensamiento lógico.</p>
+    <div class="terminal"><div>&gt; Analizando actividad...</div><div class="yellow">&gt; ADVERTENCIA: actividad sospechosa detectada</div><div class="red">&gt; POSIBLE MALWARE EN EL SISTEMA</div><div>&gt; Esperando al investigador...</div></div>
+    <div class="tip">🧠 No adivines: observa pistas, formula una hipótesis y piensa en las consecuencias.</div>
+    <p><b>Regla:</b> comienzas con 3 vidas. Si las pierdes todas, la misión termina.</p>
+    <button id="start" class="primary">🚀 Iniciar misión</button>
+  </section>
+
+  <section id="game" class="screen hidden">
+    <div class="head">
+      <div><small id="num"></small><h2 id="title"></h2><p id="desc"></p></div>
+      <div class="progress-wrap"><div style="display:flex;justify-content:space-between;gap:10px"><span>Infección</span><b id="infText">20%</b></div><div class="bar"><div id="inf" class="fill"></div></div></div>
+    </div>
+    <div id="mission" class="mission"></div>
+    <div id="content"></div>
+    <div id="feedback" class="feedback hidden"></div>
+    <div id="tip" class="tip hidden"></div>
+    <div class="actions"><button id="hint">💡 Pedir pista (-50)</button><button id="check" class="primary">Comprobar decisión</button></div>
+  </section>
+
+  <section id="final" class="screen center hidden">
+    <div style="font-size:68px" id="finalIcon">🏆</div>
+    <h2 id="finalTitle">¡Misión completada!</h2>
+    <p id="finalMsg"></p>
+    <div style="font-size:clamp(34px,6vw,52px);color:#8050b8;font-weight:850"><span id="finalScore">0</span> puntos</div>
+    <div class="learn" id="learning">
+      <div>🦠 <b>Malware:</b> aprendiste a reconocer señales de software malicioso.</div>
+      <div>🎣 <b>Phishing:</b> aprendiste a analizar mensajes, enlaces y archivos.</div>
+      <div>🔐 <b>Ransomware:</b> aprendiste sobre el cifrado y la pérdida de acceso a archivos.</div>
+      <div>🌐 <b>Aislamiento:</b> aprendiste por qué separar un equipo afectado de la red puede ser importante.</div>
+      <div>💾 <b>Copias de seguridad:</b> aprendiste su papel en la recuperación.</div>
+      <div>🧠 <b>Pensamiento lógico:</b> utilizaste evidencias, causas, consecuencias y decisiones.</div>
+    </div>
+    <button id="restart" class="primary">🔄 Jugar nuevamente</button>
+  </section>
+</div>
+
+<script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id);
+const S={score:0,lives:3,level:0,inf:20,sel:[],hint:0,timer:null,time:25,busy:false,ended:false,levels:[]};
+const baseLevels=[
+ {t:"Las primeras pistas",d:"Identifica señales que justifican investigar.",m:"<b>CASO 01:</b> Selecciona exactamente las <strong>4 pistas sospechosas</strong>. No selecciones las situaciones normales.",type:"evidence",items:[
+ ["unknown","📧","Remitente desconocido","El correo llegó desde una dirección que no reconoces."],
+ ["exe","📎","Archivo .exe inesperado","Incluye un programa que no esperabas recibir."],
+ ["admin","🔑","Pide permisos de administrador","El archivo solicita permisos elevados."],
+ ["normal","🖼️","Foto personal","Una fotografía conocida."],
+ ["changes","📁","Archivos cambiando","Varios archivos se modifican sin que los edites."],
+ ["music","🎵","Escuchar música","Reproduces una canción conocida."]],correct:["unknown","exe","admin","changes"],hint:"Busca elementos inesperados, desconocidos o acciones que ocurran sin autorización.",exp:"Un origen desconocido, un ejecutable inesperado, permisos elevados y cambios no autorizados forman una cadena de señales de riesgo."},
+ {t:"¿Cómo entró?",d:"Reconstruye una posible cadena de infección.",m:"<b>CASO 02:</b> Ordena los acontecimientos usando causa y consecuencia.",type:"sequence",items:["El programa comienza a ejecutarse.","Aparecen comportamientos extraños.","El usuario recibe un correo sospechoso.","El usuario abre el archivo adjunto."],hint:"Piensa qué acontecimiento debe ocurrir antes del siguiente.",exp:"Una posible cadena es: correo sospechoso → archivo abierto → ejecución → comportamiento extraño."},
+ {t:"Laboratorio de malware",d:"Investiga un archivo sospechoso sin ejecutarlo.",m:"<b>CASO 03:</b> Elige la acción más segura.",type:"malware",hint:"No ejecutes algo sospechoso simplemente para descubrir qué hace.",exp:"Inspeccionar o analizar permite obtener información sin asumir el riesgo de ejecutar directamente el archivo."},
+ {t:"¡Ransomware detectado!",d:"Los archivos están siendo cifrados. Debes responder.",m:"<b>EMERGENCIA:</b> Aparecen archivos bloqueados. ¿Qué harías primero?",type:"ransom",hint:"Piensa cómo impedir que el equipo siga conectado con otros sistemas.",exp:"Aislar el dispositivo de la red es una medida inicial importante ante un posible incidente de ransomware; después deben seguirse los procedimientos de respuesta."},
+ {t:"Reconstruye la respuesta",d:"Ordena las acciones de respuesta al incidente.",m:"<b>CASO 05:</b> Usa lógica para ordenar la respuesta.",type:"response",items:["Investigar y determinar el alcance.","Recuperar desde una copia de seguridad limpia.","Detectar señales sospechosas.","Informar del incidente.","Aislar el equipo afectado."],hint:"Reconoce, contiene, comunica, investiga y finalmente recupera.",exp:"La respuesta requiere reconocer, contener, comunicar, investigar y después recuperar de forma segura."},
+ {t:"Construye tu escudo",d:"Elige medidas para reducir riesgos futuros.",m:"<b>ÚLTIMA MISIÓN:</b> Selecciona exactamente cinco medidas.",type:"defense",items:[
+ ["updates","🔄","Mantener sistemas actualizados","Instalar actualizaciones de seguridad."],["backup","💾","Copias de seguridad","Mantener copias útiles y protegidas."],["password","🔑","Contraseñas fuertes y únicas","Evitar reutilizar credenciales."],["phishing","📧","Reconocer phishing","Revisar mensajes, enlaces y archivos."],["security","🛡️","Protección de seguridad","Utilizar herramientas de protección adecuadas."],["disable","❌","Desactivar actualizaciones","Evitar instalar actualizaciones."],["open","⚠️","Abrir cualquier archivo","Ejecutar archivos sin verificar su origen."]],correct:["updates","backup","password","phishing","security"],hint:"Combina prevención, recuperación, credenciales seguras, detección de engaños y protección.",exp:"Una defensa completa combina prevención, detección y recuperación."}
+];
+function stats(){
+ $("score").textContent=Math.max(0,S.score);
+ $("lives").textContent="❤️".repeat(S.lives)+"🖤".repeat(3-S.lives);
+ $("lvl").textContent=`${Math.min(S.level+1,6)}/6`;
+ $("infText").textContent=S.inf+"%";$("inf").style.width=S.inf+"%";
+}
+function score(n){S.score=Math.max(0,S.score+n);stats()}
+function infection(n){S.inf=Math.max(0,Math.min(100,S.inf+n));stats()}
+function fb(c,t,m){$("feedback").className="feedback "+c;$("feedback").innerHTML="<b>"+t+"</b><br>"+m}
+function stopTimer(){if(S.timer){clearInterval(S.timer);S.timer=null}}
+function finish(won){
+ if(S.ended)return;
+ S.ended=true;S.busy=true;stopTimer();
+ $("game").classList.add("hidden");$("final").classList.remove("hidden");
+ $("finalScore").textContent=S.score;
+ $("finalIcon").textContent=won?"🏆":"💔";
+ $("finalTitle").textContent=won?(S.score>=1400?"¡Analista de ciberseguridad!":"¡Misión completada!"):"¡Se agotaron tus vidas!";
+ $("finalMsg").textContent=won
+  ?"Has investigado un incidente, utilizado evidencias y aprendido conceptos fundamentales de ciberseguridad."
+  :"El sistema quedó comprometido antes de completar la misión. Repasa las pistas y vuelve a intentarlo.";
+ $("learning").classList.toggle("hidden",!won);
+}
+function lose(){
+ S.lives=Math.max(0,S.lives-1);stats();
+ if(S.lives===0){finish(false);return true}
+ return false;
+}
+function hint(){
+ if(S.ended||S.busy)return;
+ if(S.hint>=2){$("tip").classList.remove("hidden");$("tip").innerHTML="💡 Ya usaste las dos pistas de este nivel.";return}
+ score(-50);S.hint++;$("tip").classList.remove("hidden");$("tip").innerHTML="💡 <b>Pista:</b> "+S.levels[S.level].hint;
+}
+function start(){
+ stopTimer();S.score=0;S.lives=3;S.level=0;S.inf=20;S.sel=[];S.hint=0;S.busy=false;S.ended=false;
+ S.levels=JSON.parse(JSON.stringify(baseLevels));
+ $("intro").classList.add("hidden");$("final").classList.add("hidden");$("game").classList.remove("hidden");
+ load();
+}
+function load(){
+ stopTimer();S.sel=[];S.hint=0;S.busy=false;
+ $("feedback").classList.add("hidden");$("tip").classList.add("hidden");
+ let l=S.levels[S.level];$("num").textContent="NIVEL "+(S.level+1);$("title").textContent=l.t;$("desc").textContent=l.d;$("mission").innerHTML=l.m;
+ $("check").disabled=false;$("hint").disabled=false;
+ $("check").textContent=S.level===5?"🛡️ Construir defensa":"Comprobar decisión";
+ render(l);stats();
+}
+function render(l){
+ $("content").innerHTML="";
+ if(l.type==="evidence")evidence(l);
+ if(l.type==="sequence"||l.type==="response")sequence(l);
+ if(l.type==="malware")malware();
+ if(l.type==="ransom")ransom();
+ if(l.type==="defense")defense(l);
+}
+function evidence(l){
+ let g=document.createElement("div");g.className="grid";
+ l.items.forEach(x=>{let b=document.createElement("button");b.className="card";b.innerHTML=`<div class="icon">${x[1]}</div><b>${x[2]}</b><div class="muted">${x[3]}</div>`;
+ b.onclick=()=>{if(S.busy||S.ended)return;if(S.sel.includes(x[0])){S.sel=S.sel.filter(v=>v!==x[0]);b.classList.remove("selected")}else{S.sel.push(x[0]);b.classList.add("selected")}};
+ g.appendChild(b)});$("content").appendChild(g);
+}
+function sequence(l){
+ let wrap=document.createElement("div");wrap.className="sequence";
+ wrap.innerHTML='<div class="muted" style="margin-bottom:4px">🖱️ Arrastra cada acción y suéltala en la posición que corresponda. También puedes usar ▲ ▼.</div>';
+ l.items.forEach((x,i)=>{
+  let r=document.createElement("div");r.className="row";r.draggable=true;r.dataset.value=x;
+  r.innerHTML=`<span class="step-text"><span class="drag-handle">⠿</span><b class="num">${i+1}.</b> ${x}</span><span class="move-buttons"><button class="small" data-u title="Subir">▲</button><button class="small" data-d title="Bajar">▼</button></span>`;
+  r.querySelector("[data-u]").onclick=e=>{e.stopPropagation();if(S.busy)return;let prev=r.previousElementSibling;if(prev&&prev.classList.contains("row"))wrap.insertBefore(r,prev);renumberSequence(wrap,l)};
+  r.querySelector("[data-d]").onclick=e=>{e.stopPropagation();if(S.busy)return;let next=r.nextElementSibling;if(next&&next.classList.contains("row"))wrap.insertBefore(next,r);renumberSequence(wrap,l)};
+  r.addEventListener("dragstart",()=>{if(S.busy)return;r.classList.add("dragging")});
+  r.addEventListener("dragend",()=>{r.classList.remove("dragging");wrap.querySelectorAll(".row").forEach(el=>el.classList.remove("drag-over"));renumberSequence(wrap,l)});
+  r.addEventListener("dragover",e=>{e.preventDefault();const dragging=wrap.querySelector(".dragging");if(!dragging||dragging===r||S.busy)return;r.classList.add("drag-over");const rect=r.getBoundingClientRect();if(e.clientY>rect.top+rect.height/2)wrap.insertBefore(dragging,r.nextSibling);else wrap.insertBefore(dragging,r)});
+  r.addEventListener("dragleave",()=>r.classList.remove("drag-over"));
+  r.addEventListener("drop",e=>{e.preventDefault();r.classList.remove("drag-over");renumberSequence(wrap,l)});
+  wrap.appendChild(r);
+ });
+ $("content").appendChild(wrap);
+}
+function renumberSequence(wrap,l){
+ const rows=[...wrap.querySelectorAll(".row")];l.items=rows.map(row=>row.dataset.value);
+ rows.forEach((row,i)=>row.querySelector(".num").textContent=(i+1)+".");
+}
+function choices(arr){
+ let g=document.createElement("div");g.className="grid";
+ arr.forEach(x=>{let b=document.createElement("button");b.className="card";b.innerHTML=`<div class="icon">${x[1]}</div><b>${x[2]}</b><div class="muted">${x[3]}</div>`;
+ b.onclick=()=>{if(S.busy||S.ended)return;g.querySelectorAll("button").forEach(z=>z.classList.remove("selected"));b.classList.add("selected");S.sel=[x[0]]};
+ g.appendChild(b)});$("content").appendChild(g);
+}
+function malware(){
+ $("content").innerHTML='<div class="terminal"><div>&gt; ARCHIVO: Factura_2026.exe</div><div>&gt; Origen: remitente desconocido</div><div class="yellow">&gt; Solicita permisos de administrador</div><div class="red">&gt; ESTADO: SOSPECHOSO</div></div>';
+ choices([["inspect","🔎","Inspeccionar","Revisar información antes de ejecutarlo."],["analyze","🧪","Analizar","Utilizar una herramienta de seguridad."],["execute","▶️","Ejecutarlo","Abrirlo para descubrir qué hace."],["share","📤","Compartirlo","Enviar el archivo a otra persona."]]);
+}
+function startRansomTimer(){
+ stopTimer();S.time=25;let t=$("time");if(t)t.textContent=S.time;
+ S.timer=setInterval(()=>{
+  if(S.ended||S.levels[S.level].type!=="ransom"){stopTimer();return}
+  S.time--;let node=$("time");if(node)node.textContent=S.time;
+  if(S.time<=0){
+   stopTimer();S.sel=[];infection(20);
+   if(!lose()) {fb("bad","⏱️ Tiempo agotado","La infección siguió avanzando. Elige cómo aislar el equipo; el contador volverá a empezar.");startRansomTimer()}
+  }
+ },1000);
+}
+function ransom(){
+ $("content").innerHTML='<div class="timer">⏱️ <span id="time">25</span>s</div><div class="terminal"><div class="red">&gt; ALERTA: actividad de cifrado detectada</div><div class="red">&gt; POSIBLE RANSOMWARE</div></div><div class="files"><div class="file">📄🔒<br><b>Proyecto.docx</b></div><div class="file">📸🔒<br><b>Fotos.jpg</b></div><div class="file">📊🔒<br><b>Presentacion.xlsx</b></div></div>';
+ choices([["continue","💻","Seguir trabajando","Ignorar la alerta."],["isolate","🌐🚫","Aislar el equipo","Desconectar el dispositivo de la red."],["open","📂","Abrir más archivos","Comprobar manualmente los archivos."],["download","⬇️","Descargar un desbloqueador","Usar un programa desconocido."]]);
+ startRansomTimer();
+}
+function defense(l){
+ let g=document.createElement("div");g.className="grid";
+ l.items.forEach(x=>{let b=document.createElement("button");b.className="card";b.innerHTML=`<div class="icon">${x[1]}</div><b>${x[2]}</b><div class="muted">${x[3]}</div>`;
+ b.onclick=()=>{if(S.busy||S.ended)return;if(S.sel.includes(x[0])){S.sel=S.sel.filter(v=>v!==x[0]);b.classList.remove("selected")}else if(S.sel.length<5){S.sel.push(x[0]);b.classList.add("selected")}else fb("info","🛡️ Escudo completo","Ya seleccionaste cinco medidas.")};
+ g.appendChild(b)});$("content").appendChild(g);
+}
+function check(){
+ if(S.ended||S.busy)return;
+ let l=S.levels[S.level],ok=false;
+ if(l.type==="evidence"){
+  const selected=[...new Set(S.sel)],expected=[...new Set(l.correct)];
+  ok=selected.length===expected.length&&expected.every(id=>selected.includes(id));
+ }else if(l.type==="sequence"){
+  const expected=["El usuario recibe un correo sospechoso.","El usuario abre el archivo adjunto.","El programa comienza a ejecutarse.","Aparecen comportamientos extraños."];
+  ok=l.items.every((x,i)=>x===expected[i]);
+ }else if(l.type==="malware")ok=S.sel[0]==="inspect"||S.sel[0]==="analyze";
+ else if(l.type==="ransom")ok=S.sel[0]==="isolate";
+ else if(l.type==="response")ok=l.items.join("|")==["Detectar señales sospechosas.","Aislar el equipo afectado.","Informar del incidente.","Investigar y determinar el alcance.","Recuperar desde una copia de seguridad limpia."].join("|");
+ else if(l.type==="defense"){
+  const selected=[...new Set(S.sel)],expected=[...new Set(l.correct)];
+  ok=selected.length===expected.length&&expected.every(id=>selected.includes(id));
+ }
+ if(!ok){
+  score(-90);infection(l.type==="ransom"?20:10);
+  if(lose())return;
+  fb("bad","❌ Necesitas revisar tu razonamiento",l.exp+" Usa las pistas antes de volver a intentarlo.");
+  if(l.type==="ransom")startRansomTimer();
+  return;
+ }
+ S.busy=true;stopTimer();$("check").disabled=true;$("hint").disabled=true;
+ let pts=[200,250,250,350,350,500][S.level];score(pts);infection(-10);
+ fb("good","🧠 ¡Excelente decisión!",l.exp);
+ if(S.level===5)setTimeout(()=>finish(true),1000);
+ else setTimeout(()=>{if(S.ended)return;S.level++;load()},1100);
+}
+$("start").onclick=start;$("restart").onclick=start;$("hint").onclick=hint;$("check").onclick=check;stats();
+})();
+</script>
+</body>
+</html>
